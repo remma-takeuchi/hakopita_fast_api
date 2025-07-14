@@ -46,7 +46,7 @@ cp env.remote.dev .env.remote.dev
 
 ### 環境変数の設定
 
-各環境用の`.env.{環境名}`ファイルを作成し、以下の項目を設定してください：
+`.env.template`から各環境用(dev/prod)の`.env.{環境名}`ファイルを作成し、以下の項目を設定してください：
 
 ```env
 DB_HOST=localhost
@@ -56,25 +56,12 @@ DB_PASS=your_password
 DB_NAME=hakopita_database_dev
 ```
 
-### データベース構成
-
-- **開発環境**: `hakopita_database_dev`
-- **テスト環境**: `hakopita_database_test`
-- **本番環境**: `hakopita_database_v4.0`
-- **リモート開発環境**: `hakopita_database_dev` (リモートDB)
-
 ## 使用方法
 
 ### 開発環境での起動
 
 ```bash
 make run ENV=dev
-```
-
-### リモート開発環境での起動
-
-```bash
-make run ENV=remote.dev
 ```
 
 ### 本番環境での起動
@@ -89,14 +76,9 @@ make run ENV=prod
 # ローカル環境でのテスト
 make test
 
-# リモート開発環境でのテスト
-make test-remote
-
-# カバレッジ付きテスト（ローカル）
+# カバレッジ付きテスト
 make test-cov
 
-# カバレッジ付きテスト（リモート）
-make test-cov-remote
 ```
 
 ### その他のコマンド
