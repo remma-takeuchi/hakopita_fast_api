@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.crud.storage_crud import StorageDataCRUD
-from app.db.session import get_db
+from app.db.session import get_db, settings
 from app.models.storage_model import StorageData
 from app.schemas.storage_schemas import (
     ErrorResponse,
@@ -17,7 +17,8 @@ from app.schemas.storage_schemas import (
 # ロガーを取得
 logger = logging.getLogger("hakopita_fast_api.storage")
 
-router = APIRouter(prefix="/api", tags=["storage"])
+# 設定からAPIプレフィックスを取得（デフォルトは/dev）
+router = APIRouter(prefix=settings.api_prefix, tags=["storage"])
 
 
 def convert_storage_data_safely(storage_data_list: List[StorageData]) -> Tuple[List[StorageDataResponse], List[str]]:
@@ -199,7 +200,7 @@ async def search_storage(
             params.append(f"page={page + 1}")
             params.append(f"page_size={page_size}")
 
-            next_page_url = f"/api/search_storage?{'&'.join(params)}"
+            next_page_url = f"{settings.api_prefix}/search_storage?{'&'.join(params)}"
 
         # レスポンスを生成
         return SearchStorageResponse(

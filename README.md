@@ -48,7 +48,17 @@ DB_PORT=3306
 DB_USER=your_username
 DB_PASS=your_password
 DB_NAME=hakopita_database_dev
+API_PREFIX=/dev
 ```
+
+### APIプレフィックスの設定
+
+環境別にAPIプレフィックスを設定できます：
+
+- **開発環境** (`.env.dev`): `API_PREFIX=/dev`
+- **本番環境** (`.env.prod`): `API_PREFIX=/v1_0`
+
+設定されていない場合は、デフォルトで`/dev`が使用されます。
 
 ## 使用方法
 
@@ -92,7 +102,7 @@ make help
 
 ## API エンドポイント
 
-### GET /api/fetch_storage
+### GET /{prefix}/fetch_storage
 指定されたIDリストに基づいてストレージデータを取得します。
 
 **クエリパラメータ:**
@@ -100,15 +110,15 @@ make help
 
 **例:**
 ```
-GET /api/fetch_storage?id_list=0_4549131159912,100_10008758
+GET /dev/fetch_storage?id_list=0_4549131159912,100_10008758
 ```
 
 **curlコマンド例:**
 ```bash
-curl "http://localhost:8000/api/fetch_storage?id_list=0_4549131159912,100_10008758"
+curl "http://localhost:8000/dev/fetch_storage?id_list=0_4549131159912,100_10008758"
 ```
 
-### GET /api/search_storage
+### GET /{prefix}/search_storage
 サイズ条件に基づいてストレージデータを検索します。
 
 **クエリパラメータ:**
@@ -122,13 +132,17 @@ curl "http://localhost:8000/api/fetch_storage?id_list=0_4549131159912,100_100087
 
 **例:**
 ```
-GET /api/search_storage?width=20&depth=30&height=25&storage_category=0&country_code=jp&page=0&page_size=10
+GET /dev/search_storage?width=20&depth=30&height=25&storage_category=0&country_code=jp&page=0&page_size=10
 ```
 
 **curlコマンド例:**
 ```bash
-curl "http://localhost:8000/api/search_storage?country_code=jp&page=0&page_size=2000&storage_category=0&use_width_range=true&width_lower_limit=10&width_upper_limit=20"
+curl "http://localhost:8000/dev/search_storage?country_code=jp&page=0&page_size=2000&storage_category=0&use_width_range=true&width_lower_limit=10&width_upper_limit=20"
 ```
+
+**環境別のエンドポイント例:**
+- 開発環境: `http://localhost:8000/dev/search_storage?...`
+- 本番環境: `http://localhost:8000/v1_0/search_storage?...`
 
 ## プロジェクト構造
 

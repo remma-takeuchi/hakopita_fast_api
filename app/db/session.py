@@ -26,6 +26,9 @@ class Settings(BaseSettings):
     app_name: str = "HakoPita FastAPI"
     debug: bool = True
     log_level: str = "DEBUG"
+    
+    # API設定
+    api_prefix: str = "/dev"  # デフォルトは/dev
 
     model_config = ConfigDict(
         env_file=f".env.{os.getenv('ENV', 'dev')}", env_file_encoding="utf-8"
