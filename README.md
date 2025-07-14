@@ -35,12 +35,6 @@ HakoPitaのストレージデータ管理用FastAPIアプリケーション
 # 依存関係をインストール
 make install
 
-# 環境変数ファイルを設定
-cp env.dev .env.dev
-cp env.prod .env.prod
-cp env.test .env.test
-cp env.remote.dev .env.remote.dev
-
 # 各環境変数ファイルを編集して、実際のデータベース接続情報を設定
 ```
 
@@ -78,7 +72,6 @@ make test
 
 # カバレッジ付きテスト
 make test-cov
-
 ```
 
 ### その他のコマンド
@@ -133,31 +126,34 @@ GET /api/search_storage?width=20&depth=30&height=25&storage_category=0&country_c
 hakopita_fast_api/
 ├── app/
 │   ├── main.py              # FastAPIアプリケーションのエントリーポイント
+│   ├── core/
+│   │   └── logging.py       # ログ設定
 │   ├── db/
 │   │   ├── session.py       # データベースセッション管理
 │   │   └── __init__.py
 │   ├── models/
-│   │   ├── storage_data.py  # SQLAlchemyモデル
+│   │   ├── storage_model.py # SQLAlchemyモデル
 │   │   └── __init__.py
 │   ├── schemas/
-│   │   ├── storage_data.py  # Pydanticスキーマ
+│   │   ├── storage_schemas.py # Pydanticスキーマ
 │   │   └── __init__.py
 │   ├── crud/
-│   │   ├── storage_data.py  # CRUD操作
+│   │   ├── storage_crud.py  # CRUD操作
 │   │   └── __init__.py
 │   ├── routers/
-│   │   ├── storage.py       # APIルーター
+│   │   ├── storage_router.py # APIルーター
 │   │   └── __init__.py
 │   └── __init__.py
 ├── tests/
+│   ├── conftest.py          # Pytest設定
 │   ├── test_fetch_storage.py
 │   └── test_search_storage.py
 ├── pyproject.toml           # Poetry設定
+├── poetry.lock              # Poetry依存関係ロック
 ├── Makefile                 # ビルド・実行コマンド
-├── env.dev                  # 開発環境設定
-├── env.prod                 # 本番環境設定
-├── env.test                 # テスト環境設定
-├── env.remote.dev           # リモート開発環境設定
+├── .env.template            # 環境変数テンプレート
+├── .gitignore               # Git除外設定
+├── LICENSE                  # ライセンスファイル
 └── README.md
 ```
 
