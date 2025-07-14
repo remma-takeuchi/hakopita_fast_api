@@ -87,6 +87,8 @@ def get_db():
     """データベースセッションを取得する関数"""
     db = SessionLocal()
     try:
+       # 読み取り専用モードでセッションを開始
+        db.execute(text("SET TRANSACTION READ ONLY"))        
         yield db
     finally:
         db.close()

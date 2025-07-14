@@ -1,10 +1,11 @@
-from typing import List, Optional
-
+from typing import List, Tuple, Optional
+import logging
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.crud.storage_crud import StorageDataCRUD
 from app.db.session import get_db
+from app.models.storage_model import StorageData
 from app.schemas.storage_schemas import (
     ErrorResponse,
     SearchStorageRequest,
@@ -13,7 +14,35 @@ from app.schemas.storage_schemas import (
     StorageDataResponse,
 )
 
+# ロガーを取得
+logger = logging.getLogger("hakopita_fast_api.storage")
+
 router = APIRouter(prefix="/api", tags=["storage"])
+
+
+def convert_storage_data_safely(storage_data_list: List[StorageData]) -> Tuple[List[StorageDataResponse], List[str]]:
+    """
+    ストレージデータを安全にスキーマに変換する
+    
+    Returns:
+        Tuple[List[StorageDataResponse], List[str]]: (成功したデータリスト, エラーメッセージリスト)
+    """
+    successful_data = []
+    error_messages = []
+    
+    for i, storage_data in enumerate(storage_data_list):
+        try:
+            # モデルからスキーマに変換
+            converted_data = StorageDataResponse.model_validate(storage_data)
+            successful_data.append(converted_data)
+        except Exception as e:
+            # エラーが発生した場合はログに記録し、スキップ
+            error_msg = f"データ変換エラー (index {i}, ID: {getattr(storage_data, 'storage_data_id', 'unknown')}): {str(e)}"
+            error_messages.append(error_msg)
+            # loggerを使ってwarningで出力
+            logger.warning(error_msg)
+    
+    return successful_data, error_messages
 
 
 @router.get("/fetch_storage", response_model=StorageDataListResponse)
@@ -40,9 +69,16 @@ async def fetch_storage(
         # CRUD操作を実行
         crud = StorageDataCRUD(db)
         storage_data_list = crud.get_by_ids(storage_data_ids)
-
-        # レスポンスを生成
-        return StorageDataListResponse(data=storage_data_list)
+        
+        # 安全にスキーマに変換
+        successful_data, error_messages = convert_storage_data_safely(storage_data_list)
+        
+        # エラーメッセージがある場合はログに記録
+        if error_messages:
+            logger.warning(f"{len(error_messages)}件のデータ変換エラーが発生しました")
+        
+        # 成功したデータのみを返却
+        return StorageDataListResponse(data=successful_data)
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
@@ -126,12 +162,19 @@ async def search_storage(
         # CRUD操作を実行
         crud = StorageDataCRUD(db)
         all_results = crud.search_by_params(search_params)
+        
+        # 安全にスキーマに変換
+        successful_data, error_messages = convert_storage_data_safely(all_results)
+        
+        # エラーメッセージがある場合はログに記録
+        if error_messages:
+            logger.debug(f"{len(error_messages)}件のデータ変換エラーが発生しました")
 
-        # ページネーション処理
-        total_items = len(all_results)
+        # ページネーション処理（成功したデータに対して）
+        total_items = len(successful_data)
         total_pages = (total_items + page_size - 1) // page_size if page_size > 0 else 1
         offset = page * page_size
-        paginated_results = all_results[offset : offset + page_size]
+        paginated_results = successful_data[offset : offset + page_size]
         has_more = offset + page_size < total_items
 
         # 次のページのURLを生成

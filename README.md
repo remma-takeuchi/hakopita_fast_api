@@ -103,6 +103,11 @@ make help
 GET /api/fetch_storage?id_list=0_4549131159912,100_10008758
 ```
 
+**curlコマンド例:**
+```bash
+curl "http://localhost:8000/api/fetch_storage?id_list=0_4549131159912,100_10008758"
+```
+
 ### GET /api/search_storage
 サイズ条件に基づいてストレージデータを検索します。
 
@@ -118,6 +123,11 @@ GET /api/fetch_storage?id_list=0_4549131159912,100_10008758
 **例:**
 ```
 GET /api/search_storage?width=20&depth=30&height=25&storage_category=0&country_code=jp&page=0&page_size=10
+```
+
+**curlコマンド例:**
+```bash
+curl "http://localhost:8000/api/search_storage?country_code=jp&page=0&page_size=2000&storage_category=0&use_width_range=true&width_lower_limit=10&width_upper_limit=20"
 ```
 
 ## プロジェクト構造
