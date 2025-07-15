@@ -14,7 +14,7 @@ def test_fetch_storage_success(setup_database, test_client):
     logger.info(f"テストID: {test_ids}")
 
     # APIを呼び出し
-    response = test_client.get(f"/dev/fetch_storage?id_list={','.join(test_ids)}")
+    response = test_client.get(f"/fetch_storage?id_list={','.join(test_ids)}")
 
     # レスポンスを検証
     assert response.status_code == 200
@@ -30,7 +30,7 @@ def test_fetch_storage_empty_id_list(setup_database, test_client):
     """空のIDリストでのfetch_storage APIのテスト"""
     logger.info("=== 空のIDリストでのfetch_storage APIのテストを開始 ===")
 
-    response = test_client.get("/dev/fetch_storage?id_list=")
+    response = test_client.get("/fetch_storage?id_list=")
 
     # 空のIDリストの場合は200で空のデータが返される
     assert response.status_code == 200
@@ -46,7 +46,7 @@ def test_fetch_storage_missing_id_list(setup_database, test_client):
     """IDリストパラメータが不足している場合のテスト"""
     logger.info("=== IDリストパラメータ不足のテストを開始 ===")
 
-    response = test_client.get("/dev/fetch_storage")
+    response = test_client.get("/fetch_storage")
 
     assert response.status_code == 422  # Validation error
     logger.info(f"バリデーションエラーレスポンス: {response.json()}")
@@ -57,7 +57,7 @@ def test_fetch_storage_invalid_ids(setup_database, test_client):
     """無効なIDでのfetch_storage APIのテスト"""
     logger.info("=== 無効なIDでのfetch_storage APIのテストを開始 ===")
 
-    response = test_client.get("/dev/fetch_storage?id_list=invalid_id_1,invalid_id_2")
+    response = test_client.get("/fetch_storage?id_list=invalid_id_1,invalid_id_2")
 
     assert response.status_code == 200
     data = response.json()
@@ -71,7 +71,7 @@ def test_fetch_storage_single_id(setup_database, test_client):
     """単一IDでのfetch_storage APIのテスト"""
     logger.info("=== 単一IDでのfetch_storage APIのテストを開始 ===")
 
-    response = test_client.get("/dev/fetch_storage?id_list=single_test_id")
+    response = test_client.get("/fetch_storage?id_list=single_test_id")
 
     assert response.status_code == 200
     data = response.json()
@@ -85,7 +85,7 @@ def test_fetch_storage_with_spaces(setup_database, test_client):
     """スペースを含むIDリストでのfetch_storage APIのテスト"""
     logger.info("=== スペースを含むIDリストでのfetch_storage APIのテストを開始 ===")
 
-    response = test_client.get("/dev/fetch_storage?id_list= id1 , id2 , id3 ")
+    response = test_client.get("/fetch_storage?id_list= id1 , id2 , id3 ")
 
     assert response.status_code == 200
     data = response.json()

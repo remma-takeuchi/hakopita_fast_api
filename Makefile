@@ -54,6 +54,24 @@ prod:
 	@echo "Starting production server..."
 	ENV=prod $(POETRY) uvicorn app.main:app --host 0.0.0.0 --port 8000
 
+# Serverless Frameworkでデプロイ
+deploy-serverless:
+	@echo "Deploying with Serverless Framework..."
+	serverless deploy --stage dev
+
+# Serverless Frameworkで削除
+remove-serverless:
+	@echo "Removing Serverless deployment..."
+	serverless remove --stage dev
+
+deploy-serverless-prod:
+	@echo "Deploying with Serverless Framework..."
+	serverless deploy --stage v1
+
+remove-serverless-prod:
+	@echo "Removing Serverless deployment..."
+	serverless remove --stage v1
+
 # ヘルプ表示
 help:
 	@echo "Available commands:"
@@ -67,6 +85,8 @@ help:
 	@echo "  make update              - Update dependencies"
 	@echo "  make dev                 - Start development server"
 	@echo "  make prod                - Start production server"
+	@echo "  make deploy-serverless   - Deploy with Serverless Framework"
+	@echo "  make remove-serverless   - Remove Serverless deployment"
 	@echo "  make help                - Show this help"
 
-.PHONY: run test test-cov format lint install update dev prod help 
+.PHONY: run test test-cov format lint install update dev prod deploy-serverless remove-serverless help 

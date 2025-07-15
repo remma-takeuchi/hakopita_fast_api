@@ -37,7 +37,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ルーターを追加
+# ルーターを追加（prefixなし）
 app.include_router(storage_router)
 
 
@@ -55,6 +55,15 @@ async def root():
 async def health_check():
     """ヘルスチェックエンドポイント"""
     return {"status": "healthy"}
+
+
+@app.get("/test")
+async def test_endpoint():
+    """テスト用エンドポイント（データベース接続なし）"""
+    return {
+        "message": "Test endpoint working",
+        "env": os.getenv("ENV", "unknown")
+    }
 
 
 @app.exception_handler(Exception)

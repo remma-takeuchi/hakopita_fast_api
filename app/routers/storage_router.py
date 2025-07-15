@@ -13,12 +13,13 @@ from app.schemas.storage_schemas import (
     StorageDataListResponse,
     StorageDataResponse,
 )
+from app.core.logging import get_logger
 
 # ロガーを取得
-logger = logging.getLogger("hakopita_fast_api.storage")
+logger = get_logger("hakopita_fast_api.storage")
 
-# 設定からAPIプレフィックスを取得（デフォルトは/dev）
-router = APIRouter(prefix=settings.api_prefix, tags=["storage"])
+# プレフィックスなしでAPIRouterを作成
+router = APIRouter(tags=["storage"])
 
 
 def convert_storage_data_safely(storage_data_list: List[StorageData]) -> Tuple[List[StorageDataResponse], List[str]]:
@@ -200,7 +201,7 @@ async def search_storage(
             params.append(f"page={page + 1}")
             params.append(f"page_size={page_size}")
 
-            next_page_url = f"{settings.api_prefix}/search_storage?{'&'.join(params)}"
+            next_page_url = f"search_storage?{'&'.join(params)}"
 
         # レスポンスを生成
         return SearchStorageResponse(
