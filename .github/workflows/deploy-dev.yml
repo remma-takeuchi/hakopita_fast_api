@@ -1,0 +1,41 @@
+name: Deploy to Dev
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  call-test:
+    uses: ./.github/workflows/test.yml
+
+  deploy-dev:
+    needs: call-test
+    runs-on: ubuntu-latest
+    if: ${{ needs.call-test.result == 'success' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        run: pip install poetry
+
+      - name: Install dependencies
+        run: poetry install
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-1
+
+      - name: Install Serverless Framework
+        run: npm install -g serverless
+
+      - name: Deploy to dev
+        run: make deploy-serverless 
