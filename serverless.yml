@@ -9,6 +9,16 @@ provider:
   timeout: 30
   environment:
     ENV: ${opt:stage, 'dev'}
+    DB_HOST: ${ssm:/hakopita-fast-api-${opt:stage, 'dev'}/DB_HOST}
+    DB_PORT: ${ssm:/hakopita-fast-api-${opt:stage, 'dev'}/DB_PORT}
+    DB_USER: ${ssm:/hakopita-fast-api-${opt:stage, 'dev'}/DB_USER}
+    DB_PASS: ${ssm:/hakopita-fast-api-${opt:stage, 'dev'}/DB_PASS}
+    DB_NAME: ${ssm:/hakopita-fast-api-${opt:stage, 'dev'}/DB_NAME}
+    DATABASE_URL: ${ssm:/hakopita-fast-api-${opt:stage, 'dev'}/DATABASE_URL}
+    APP_NAME: ${ssm:/hakopita-fast-api-${opt:stage, 'dev'}/APP_NAME}
+    DEBUG: ${ssm:/hakopita-fast-api-${opt:stage, 'dev'}/DEBUG}
+    LOG_LEVEL: ${ssm:/hakopita-fast-api-${opt:stage, 'dev'}/LOG_LEVEL}
+    
   httpApi:
     name: hakopita-fast-api-gw-${opt:stage, 'dev'}
   iam:

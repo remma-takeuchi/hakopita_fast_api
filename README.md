@@ -230,6 +230,33 @@ make help
 - セキュリティグループID、サブネットIDなどの機密情報は公開リポジトリに記載しないでください
 - AWS Systems Manager Parameter Storeを使用して機密情報を管理してください
 
-## ライセンス
+### 補足：SSMパラメータによる接続先DBの登録（AWS Lambda環境）
 
-このプロジェクトはMITライセンスの下で公開されています。 
+本プロジェクトはデータベース接続情報等の機密情報は、AWS Systems Manager Parameter Store（SSM）で管理することができます。
+`set_ssm_from_env.sh`を利用することで`.env.*`に記載される接続先情報を、SSMパラメータとして一括登録できます。
+
+#### 目的・用途
+- 機密情報（DB接続情報など）をGitリポジトリに含めず、AWS SSM Parameter Storeで安全に管理する
+- 環境ごと（dev, v1など）に異なるパラメータを簡単に一括登録できる
+- Serverless Frameworkの`serverless.yml`からSSMパラメータを参照し、Lambdaの環境変数として利用する
+
+#### 使用方法
+1. 事前にAWS CLIで認証情報を設定しておく（`aws configure`など）
+2. `.env.dev`や`.env.v1`など、各環境用の.envファイルを用意する
+3. スクリプトを実行
+
+```bash
+./set_ssm_from_env.sh .env.v1 v1
+```
+- 第1引数: .envファイルのパス
+- 第2引数: ステージ名（例: dev, v1 など）
+
+これにより、.envファイル内の各キー・バリューが`/hakopita-fast-api-<ステージ>/<キー名>`というSSMパラメータとしてSecureString型で登録されます。
+
+> 例: `.env.v1`に`DB_HOST=xxx.rds.amazonaws.com`とあれば、
+> `/hakopita-fast-api-v1/DB_HOST` というSSMパラメータが作成されます。
+
+### 注意事項
+- スクリプトは**.envファイルの全てのキーをSSMに登録**します。不要な情報は.envから除外してください。
+- SSMパラメータの登録・上書きには適切なIAM権限が必要です。
+- SSMパラメータはServerless Frameworkの`serverless.yml`で`${ssm:/hakopita-fast-api-${opt:stage}/DB_HOST}`のように参照しています。
