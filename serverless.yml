@@ -6,16 +6,11 @@ provider:
   name: aws
   runtime: python3.11
   region: ap-northeast-1
-  memorySize: 512
   timeout: 30
   environment:
-    # 環境変数を設定（実際の値はAWS Systems Manager Parameter Storeから取得することを推奨）
-    DB_HOST: ${ssm:/hakopita/db_host}
-    DB_PORT: ${ssm:/hakopita/db_port}
-    DB_USER: ${ssm:/hakopita/db_user}
-    DB_PASS: ${ssm:/hakopita/db_pass}
-    DB_NAME: ${ssm:/hakopita/db_name}
-    API_PREFIX: /v1_0
+    ENV: ${opt:stage, 'dev'}
+  httpApi:
+    name: hakopita-fast-api-gw-${opt:stage, 'dev'}
   iam:
     role:
       statements:
@@ -29,19 +24,16 @@ provider:
 functions:
   api:
     handler: lambda_handler.lambda_handler
+    name: hakopita-fast-api-${opt:stage, 'dev'}
     events:
       - httpApi:
           path: /{proxy+}
           method: ANY
-    environment:
-      # 環境別の設定
-      ENV: prod
     vpc:
       securityGroupIds:
         - ${ssm:/hakopita/security_group_id}
       subnetIds:
-        - ${ssm:/hakopita/subnet_id_1}
-        - ${ssm:/hakopita/subnet_id_2}
+        - ${ssm:/hakopita/subnet_id}
 
 plugins:
   - serverless-python-requirements
@@ -49,9 +41,10 @@ plugins:
 custom:
   pythonRequirements:
     dockerizePip: true
-    layer:
-      name: python-deps
-      description: Python dependencies for hakopita-fast-api
+    layer: false
+    slim: false
+    usePoetry: true
+    poetryPyprojectFile: pyproject.toml
     noDeploy:
       - coverage
       - pytest
