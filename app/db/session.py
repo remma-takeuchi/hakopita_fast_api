@@ -34,6 +34,8 @@ class Settings(BaseSettings):
 
 # 設定インスタンスを作成
 settings = Settings()
+print(settings.database_url)
+print(os.environ)
 
 # SQLAlchemy設定
 engine = create_engine(
