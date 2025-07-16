@@ -17,16 +17,18 @@ do
   if [[ "$key" =~ ^#.*$ || -z "$key" ]]; then
     continue
   fi
-  # キーがDATABASE_URLの場合は、スキップ（session.pyで正しく生成されるため）
+  # キーがDATABASE_URLの場合は、データベースURLを作成
   if [ "$key" = "DATABASE_URL" ]; then
-    continue
-  fi  
+    value="mysql+pymysql://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
   # その他のキーは末尾の改行やクォートを除去して登録
-  value=$(echo "$value" | sed -e 's/^"//' -e 's/"$//')
+  else
+    value=$(echo "$value" | sed -e 's/^"//' -e 's/"$//')
+  fi
   echo "Setting SSM Parameter: $PREFIX/${key}: $value"
   aws ssm put-parameter \
     --name "$PREFIX/${key}" \
     --value "$value" \
     --type "SecureString" \
     --overwrite
+  export $key=$value
 done < "$ENV_FILE"

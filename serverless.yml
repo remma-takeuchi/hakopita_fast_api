@@ -15,6 +15,7 @@ provider:
     DB_USER: ${ssm:/hakopita-fast-api-${opt:stage, 'dev'}/DB_USER}
     DB_PASS: ${ssm:/hakopita-fast-api-${opt:stage, 'dev'}/DB_PASS}
     DB_NAME: ${ssm:/hakopita-fast-api-${opt:stage, 'dev'}/DB_NAME}
+    DATABASE_URL: ${ssm:/hakopita-fast-api-${opt:stage, 'dev'}/DATABASE_URL}
     APP_NAME: ${ssm:/hakopita-fast-api-${opt:stage, 'dev'}/APP_NAME}
     DEBUG: ${ssm:/hakopita-fast-api-${opt:stage, 'dev'}/DEBUG}
     LOG_LEVEL: ${ssm:/hakopita-fast-api-${opt:stage, 'dev'}/LOG_LEVEL}
