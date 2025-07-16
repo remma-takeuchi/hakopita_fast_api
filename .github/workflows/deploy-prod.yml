@@ -1,14 +1,15 @@
-name: Deploy to Dev
+name: Deploy to Production
 
 on:
   push:
-    branches: [main]
+    tags:
+      - 'v*'
 
 jobs:
   call-test:
     uses: ./.github/workflows/test.yml
 
-  deploy-dev:
+  deploy-prod:
     needs: call-test
     runs-on: ubuntu-latest
     if: ${{ needs.call-test.result == 'success' }}
@@ -39,5 +40,5 @@ jobs:
           npm install -g serverless@3
           serverless plugin install -n serverless-python-requirements
 
-      - name: Deploy to dev
-        run: make deploy-serverless 
+      - name: Deploy to production
+        run: make deploy-serverless-prod 
