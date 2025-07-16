@@ -1,6 +1,5 @@
 import logging
 import os
-import subprocess
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -13,21 +12,8 @@ from app.routers.storage_router import router as storage_router
 # ログ設定をセットアップ
 logger = setup_logging()
 
-# バージョン取得（起動時に一度だけ実行）
-def get_git_version():
-    try:
-        result = subprocess.run(
-            ['git', 'describe', '--tags', '--always'],
-            capture_output=True, text=True, check=True
-        )
-        version = result.stdout.strip()
-        return version
-    except (subprocess.CalledProcessError, FileNotFoundError) as e:
-        logger.error(f"Git version not found: {e}")
-        return "unknown"
-
-# バージョンをメタ情報として保持
-VERSION = get_git_version()
+# バージョン取得（環境変数から）
+VERSION = os.getenv("VERSION", "unknown")
 
 # データベーステーブルを作成（エラーハンドリング付き）
 try:

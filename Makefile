@@ -57,7 +57,7 @@ prod:
 # Serverless Frameworkでデプロイ
 deploy-serverless:
 	@echo "Deploying with Serverless Framework..."
-	serverless deploy --stage dev
+	VERSION=$$(./scripts/get_version.sh) serverless deploy --stage dev
 
 # Serverless Frameworkで削除
 remove-serverless:
@@ -66,7 +66,7 @@ remove-serverless:
 
 deploy-serverless-prod:
 	@echo "Deploying with Serverless Framework..."
-	serverless deploy --stage v1
+	VERSION=$$(./scripts/get_version.sh) serverless deploy --stage v1
 
 remove-serverless-prod:
 	@echo "Removing Serverless deployment..."
