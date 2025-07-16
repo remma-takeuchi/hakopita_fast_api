@@ -29,7 +29,8 @@ provider:
             - ssm:GetParameter
             - ssm:GetParameters
           Resource: 
-            - "arn:aws:ssm:${self:provider.region}:*:parameter/hakopita/*"
+            # - "arn:aws:ssm:${self:provider.region}:*:parameter/hakopita/*"
+            - "arn:aws:ssm:${self:provider.region}:*:parameter/*"
 
 functions:
   api:

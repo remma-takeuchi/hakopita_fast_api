@@ -1,5 +1,6 @@
 import logging
 import os
+import importlib.metadata
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -24,7 +25,7 @@ except Exception as e:
 app = FastAPI(
     title=settings.app_name,
     description="HakoPitaのストレージデータ管理用FastAPIアプリケーション",
-    version="1.0.0",
+    version=importlib.metadata.version("hakopita-fast-api"),
     debug=settings.debug,
 )
 
@@ -46,7 +47,7 @@ async def root():
     """ルートエンドポイント"""
     return {
         "message": "HakoPita FastAPI",
-        "version": "1.0.0",
+        "version": importlib.metadata.version("hakopita-fast-api"),
         "status": "running",
     }
 
