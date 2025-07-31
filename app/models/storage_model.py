@@ -43,8 +43,8 @@ class StorageData(Base):
     image_url_list = Column(JSONEncodedDict, nullable=False)
     price = Column(Float, nullable=False)
     ean = Column(String(256), nullable=True)
-    country_code = Column(String(256), nullable=False)
-    active = Column(Boolean, nullable=False)
+    country_code = Column(String(256), nullable=False, index=True)
+    active = Column(Boolean, nullable=False, index=True)
 
     # サイズ情報
     height = Column(Float, nullable=False, index=True)

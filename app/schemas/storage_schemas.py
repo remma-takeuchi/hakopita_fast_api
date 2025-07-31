@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Optional, Union
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator, ValidationError
 
 
 class StorageDataBase(BaseModel):
@@ -48,6 +48,10 @@ class StorageDataListResponse(BaseModel):
 class SearchStorageRequest(BaseModel):
     """ストレージ検索リクエストスキーマ"""
 
+    # 必須パラメータ
+    country_code: str = Field(..., description="国コード（jp/us）")
+    storage_category: int = Field(..., description="ストレージカテゴリ（0: Box, 1: Shelf）")
+
     # サイズパラメータ
     width: Optional[float] = Field(None, description="幅")
     width_lower_limit: Optional[float] = Field(None, description="幅の下限")
@@ -65,15 +69,31 @@ class SearchStorageRequest(BaseModel):
     use_height_range: Optional[bool] = Field(False, description="高さの範囲指定を使用")
 
     # その他のパラメータ
-    storage_category: Optional[int] = Field(
-        0, description="ストレージカテゴリ（0: Box, 1: Shelf）"
-    )
-    country_code: Optional[str] = Field("jp", description="国コード（jp/us）")
     enable_inverted_search: Optional[bool] = Field(False, description="反転検索を有効にする")
 
     # ページネーション
     page: Optional[int] = Field(0, description="ページ番号")
     page_size: Optional[int] = Field(2000, description="ページサイズ")
+
+    @field_validator('country_code')
+    @classmethod
+    def validate_country_code(cls, v):
+        """国コードの妥当性をチェック"""
+        if not v:
+            raise ValueError("country_code is required")
+        if v not in ['jp', 'us']:
+            raise ValueError("Invalid country_code")
+        return v
+
+    @field_validator('storage_category')
+    @classmethod
+    def validate_storage_category(cls, v):
+        """ストレージカテゴリの妥当性をチェック"""
+        if v is None:
+            raise ValueError("storage_category is required")
+        if v not in [0, 1]:
+            raise ValueError("Invalid storage_category")
+        return v
 
 
 class SearchStorageResponse(BaseModel):

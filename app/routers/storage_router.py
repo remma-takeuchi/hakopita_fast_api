@@ -102,10 +102,8 @@ async def search_storage(
     height_upper_limit: Optional[float] = Query(None, description="高さの上限"),
     use_height_range: Optional[bool] = Query(False, description="高さの範囲指定を使用"),
     # その他のパラメータ
-    storage_category: Optional[int] = Query(
-        0, description="ストレージカテゴリ（0: Box, 1: Shelf）"
-    ),
-    country_code: Optional[str] = Query("jp", description="国コード（jp/us）"),
+    storage_category: int = Query(..., description="ストレージカテゴリ（0: Box, 1: Shelf）"),
+    country_code: str = Query(..., description="国コード（jp/us）"),
     enable_inverted_search: Optional[bool] = Query(False, description="反転検索を有効にする"),
     # ページネーション
     page: Optional[int] = Query(0, description="ページ番号"),

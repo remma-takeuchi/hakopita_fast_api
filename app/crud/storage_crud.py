@@ -34,11 +34,16 @@ class StorageDataCRUD:
         query = self.db.query(StorageData)
 
         # ストレージカテゴリでフィルタ
-        if params.storage_category is not None:
-            query = query.filter(
-                StorageData.storage_category == params.storage_category
-            )
+        query = query.filter(
+            StorageData.storage_category == params.storage_category
+        )
 
+        # 国コードでフィルタ
+        query = query.filter(StorageData.country_code == params.country_code)
+        
+        # アクティブフラグでフィルタ
+        query = query.filter(StorageData.active == True)
+        
         # サイズ条件でフィルタ
         size_conditions = []
 
@@ -126,12 +131,6 @@ class StorageDataCRUD:
             else:
                 # 通常の検索：AND条件で結合
                 query = query.filter(and_(*size_conditions))
-
-        # ショップIDでフィルタ（国コードに基づく）
-        if params.country_code == "jp":
-            query = query.filter(StorageData.shop_id < 100)
-        elif params.country_code == "us":
-            query = query.filter(StorageData.shop_id >= 100)
 
         return query.all()
 
