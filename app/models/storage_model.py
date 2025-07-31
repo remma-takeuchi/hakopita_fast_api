@@ -2,7 +2,7 @@ import json
 from datetime import datetime, timezone
 from typing import List, Optional
 
-from sqlalchemy import Column, DateTime, Float, Integer, String, Text
+from sqlalchemy import Boolean, Column, DateTime, Float, Integer, String, Text
 from sqlalchemy.types import Text as _Text
 from sqlalchemy.types import TypeDecorator
 
@@ -43,6 +43,8 @@ class StorageData(Base):
     image_url_list = Column(JSONEncodedDict, nullable=False)
     price = Column(Float, nullable=False)
     ean = Column(String(256), nullable=True)
+    country_code = Column(String(256), nullable=False)
+    active = Column(Boolean, nullable=False)
 
     # サイズ情報
     height = Column(Float, nullable=False, index=True)
@@ -92,4 +94,6 @@ class StorageData(Base):
             "shelf_likelihood": self.shelf_likelihood,
             "shelf_features": self.shelf_features,
             "shelf_genres": self.shelf_genres,
+            "country_code": self.country_code,
+            "active": self.active,
         }

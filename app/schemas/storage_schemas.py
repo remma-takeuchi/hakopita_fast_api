@@ -29,6 +29,8 @@ class StorageDataBase(BaseModel):
     shelf_likelihood: Optional[float] = Field(None, description="棚確率")
     shelf_features: Optional[List[int]] = Field(None, description="棚特徴")
     shelf_genres: Optional[List[int]] = Field(None, description="棚ジャンル")
+    country_code: str = Field(description="国コード（jp/us）")
+    active: bool = Field(description="アクティブフラグ")
 
 
 class StorageDataResponse(StorageDataBase):

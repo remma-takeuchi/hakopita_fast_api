@@ -119,6 +119,8 @@ def add_test_data(test_engine, num_items=10):
                 height=i * 10,
                 width=i * 10,
                 depth=i * 10,
+                country_code="jp",
+                active=True,
             ))
         db.commit()
     finally:
