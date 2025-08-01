@@ -7,11 +7,11 @@ logger = logging.getLogger(__name__)
 
 def test_fetch_storage_success(setup_database, test_client):
     """正常なfetch_storage APIのテスト"""
-    logger.info("=== 正常なfetch_storage APIのテストを開始 ===")
+    logger.info("=== Starting normal fetch_storage API test ===")
 
     # テストデータを準備
     test_ids = ["test_1", "test_2", "test_3"]
-    logger.info(f"テストID: {test_ids}")
+    logger.info(f"Test IDs: {test_ids}")
 
     # APIを呼び出し
     response = test_client.get(f"/fetch_storage?id_list={','.join(test_ids)}")
@@ -22,13 +22,20 @@ def test_fetch_storage_success(setup_database, test_client):
     assert "data" in data
     assert isinstance(data["data"], list)
     assert len(data["data"]) == len(test_ids)
-    logger.info(f"レスポンス: {data}")
-    logger.info("=== 正常なfetch_storage APIのテスト完了 ===")
+    
+    # fetch_storageではimage_url_listが含まれることを確認
+    if data["data"]:
+        for item in data["data"]:
+            assert "image_url_list" in item, "fetch_storage should include image_url_list"
+            assert isinstance(item["image_url_list"], list), "image_url_list should be a list"
+    
+    logger.info(f"Response: {data}")
+    logger.info("=== Normal fetch_storage API test completed ===")
 
 
 def test_fetch_storage_empty_id_list(setup_database, test_client):
     """空のIDリストでのfetch_storage APIのテスト"""
-    logger.info("=== 空のIDリストでのfetch_storage APIのテストを開始 ===")
+    logger.info("=== Starting fetch_storage API test with empty ID list ===")
 
     response = test_client.get("/fetch_storage?id_list=")
 
@@ -38,24 +45,24 @@ def test_fetch_storage_empty_id_list(setup_database, test_client):
     assert "data" in data
     assert isinstance(data["data"], list)
     assert len(data["data"]) == 0
-    logger.info(f"空リストレスポンス: {data}")
-    logger.info("=== 空のIDリストでのfetch_storage APIのテスト完了 ===")
+    logger.info(f"Empty list response: {data}")
+    logger.info("=== Fetch_storage API test with empty ID list completed ===")
 
 
 def test_fetch_storage_missing_id_list(setup_database, test_client):
     """IDリストパラメータが不足している場合のテスト"""
-    logger.info("=== IDリストパラメータ不足のテストを開始 ===")
+    logger.info("=== Starting test for missing ID list parameter ===")
 
     response = test_client.get("/fetch_storage")
 
     assert response.status_code == 422  # Validation error
-    logger.info(f"バリデーションエラーレスポンス: {response.json()}")
-    logger.info("=== IDリストパラメータ不足のテスト完了 ===")
+    logger.info(f"Validation error response: {response.json()}")
+    logger.info("=== Test for missing ID list parameter completed ===")
 
 
 def test_fetch_storage_invalid_ids(setup_database, test_client):
     """無効なIDでのfetch_storage APIのテスト"""
-    logger.info("=== 無効なIDでのfetch_storage APIのテストを開始 ===")
+    logger.info("=== Starting fetch_storage API test with invalid IDs ===")
 
     response = test_client.get("/fetch_storage?id_list=invalid_id_1,invalid_id_2")
 
@@ -63,13 +70,13 @@ def test_fetch_storage_invalid_ids(setup_database, test_client):
     data = response.json()
     assert "data" in data
     assert len(data["data"]) == 0  # 無効なIDなので空のリストが返される
-    logger.info(f"無効IDレスポンス: {data}")
-    logger.info("=== 無効なIDでのfetch_storage APIのテスト完了 ===")
+    logger.info(f"Invalid ID response: {data}")
+    logger.info("=== Fetch_storage API test with invalid IDs completed ===")
 
 
 def test_fetch_storage_single_id(setup_database, test_client):
     """単一IDでのfetch_storage APIのテスト"""
-    logger.info("=== 単一IDでのfetch_storage APIのテストを開始 ===")
+    logger.info("=== Starting fetch_storage API test with single ID ===")
 
     response = test_client.get("/fetch_storage?id_list=single_test_id")
 
@@ -77,13 +84,19 @@ def test_fetch_storage_single_id(setup_database, test_client):
     data = response.json()
     assert "data" in data
     assert isinstance(data["data"], list)
-    logger.info(f"単一IDレスポンス: {data}")
-    logger.info("=== 単一IDでのfetch_storage APIのテスト完了 ===")
+    
+    # 単一IDでもimage_url_listが含まれることを確認
+    if data["data"]:
+        for item in data["data"]:
+            assert "image_url_list" in item, "fetch_storage should include image_url_list"
+    
+    logger.info(f"Single ID response: {data}")
+    logger.info("=== Fetch_storage API test with single ID completed ===")
 
 
 def test_fetch_storage_with_spaces(setup_database, test_client):
     """スペースを含むIDリストでのfetch_storage APIのテスト"""
-    logger.info("=== スペースを含むIDリストでのfetch_storage APIのテストを開始 ===")
+    logger.info("=== Starting fetch_storage API test with spaces in ID list ===")
 
     response = test_client.get("/fetch_storage?id_list= id1 , id2 , id3 ")
 
@@ -91,5 +104,11 @@ def test_fetch_storage_with_spaces(setup_database, test_client):
     data = response.json()
     assert "data" in data
     assert isinstance(data["data"], list)
-    logger.info(f"スペース含みレスポンス: {data}")
-    logger.info("=== スペースを含むIDリストでのfetch_storage APIのテスト完了 ===")
+    
+    # スペース含みでもimage_url_listが含まれることを確認
+    if data["data"]:
+        for item in data["data"]:
+            assert "image_url_list" in item, "fetch_storage should include image_url_list"
+    
+    logger.info(f"Response with spaces: {data}")
+    logger.info("=== Fetch_storage API test with spaces in ID list completed ===")
