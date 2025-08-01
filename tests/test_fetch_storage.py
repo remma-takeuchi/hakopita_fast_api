@@ -132,7 +132,8 @@ def test_fetch_storage_active_behavior(setup_database_with_active_data, test_cli
     assert len(data["data"]) == len(test_ids), f"Expected {len(test_ids)} items, got {len(data['data'])}"
     
     if data["data"]:
-        logger.info(f"Returned {len(data["data"])} items regardless of active status")
+        data_count = len(data["data"])
+        logger.info(f"Returned {data_count} items regardless of active status")
         for item in data["data"]:
             # image_url_listが含まれることを確認
             assert "image_url_list" in item, "fetch_storage should include image_url_list"

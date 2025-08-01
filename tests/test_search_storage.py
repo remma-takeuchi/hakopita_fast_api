@@ -274,7 +274,8 @@ def test_search_storage_active_behavior(setup_database_with_active_data, test_cl
     
     # search_storageではactive=Trueのデータのみが返されることを確認
     if data["data"]:
-        logger.info(f"Returned {len(data["data"])} active items only")
+        data_count = len(data["data"])
+        logger.info(f"Returned {data_count} active items only")
         for item in data["data"]:
             # image_url_listが含まれないことを確認
             assert "image_url_list" not in item, "search_storage should not include image_url_list"
