@@ -258,3 +258,28 @@ def test_search_storage_schema_validation(setup_database, test_client):
             assert "image_url_list" not in item, "search_storage should not include image_url_list"
     
     logger.info("Search_storage schema validation test completed")
+
+
+def test_search_storage_active_behavior(setup_database_with_active_data, test_client):
+    """search_storageでのactiveフィールドの挙動テスト"""
+    logger.info("=== Starting search_storage active field behavior test ===")
+
+    # search_storageではactive=Trueのデータのみが返されることを確認
+    response = test_client.get("/search_storage?width=20&storage_category=0&country_code=jp")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert "data" in data
+    assert "total_items" in data
+    
+    # search_storageではactive=Trueのデータのみが返されることを確認
+    if data["data"]:
+        logger.info(f"Returned {len(data["data"])} active items only")
+        for item in data["data"]:
+            # image_url_listが含まれないことを確認
+            assert "image_url_list" not in item, "search_storage should not include image_url_list"
+            # active=Trueのデータのみが返されることを確認（storage_data_idで判定）
+            assert item["storage_data_id"].startswith("active_true_"), f"Expected active=True item, got: {item['storage_data_id']}"
+    
+    logger.info(f"Active behavior response: {data}")
+    logger.info("=== Search_storage active field behavior test completed ===")
