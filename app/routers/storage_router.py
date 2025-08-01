@@ -12,6 +12,7 @@ from app.schemas.storage_schemas import (
     SearchStorageResponse,
     StorageDataListResponse,
     StorageDataResponse,
+    StorageDataSearchResponse,
 )
 from app.core.logging import get_logger
 
@@ -22,20 +23,27 @@ logger = get_logger("hakopita_fast_api.storage")
 router = APIRouter(tags=["storage"])
 
 
-def convert_storage_data_safely(storage_data_list: List[StorageData]) -> Tuple[List[StorageDataResponse], List[str]]:
+def convert_storage_data_safely(storage_data_list: List[StorageData], use_search_response: bool = False) -> Tuple[List, List[str]]:
     """
     ストレージデータを安全にスキーマに変換する
     
+    Args:
+        storage_data_list: 変換対象のストレージデータリスト
+        use_search_response: Trueの場合はStorageDataSearchResponseを使用、Falseの場合はStorageDataResponseを使用
+    
     Returns:
-        Tuple[List[StorageDataResponse], List[str]]: (成功したデータリスト, エラーメッセージリスト)
+        Tuple[List, List[str]]: (成功したデータリスト, エラーメッセージリスト)
     """
     successful_data = []
     error_messages = []
     
+    # 使用するスキーマクラスを決定
+    schema_class = StorageDataSearchResponse if use_search_response else StorageDataResponse
+    
     for i, storage_data in enumerate(storage_data_list):
         try:
             # モデルからスキーマに変換
-            converted_data = StorageDataResponse.model_validate(storage_data)
+            converted_data = schema_class.model_validate(storage_data)
             successful_data.append(converted_data)
         except Exception as e:
             # エラーが発生した場合はログに記録し、スキップ
@@ -72,8 +80,8 @@ async def fetch_storage(
         crud = StorageDataCRUD(db)
         storage_data_list = crud.get_by_ids(storage_data_ids)
         
-        # 安全にスキーマに変換
-        successful_data, error_messages = convert_storage_data_safely(storage_data_list)
+        # 安全にスキーマに変換（fetch_storageでは従来通りStorageDataResponseを使用）
+        successful_data, error_messages = convert_storage_data_safely(storage_data_list, use_search_response=False)
         
         # エラーメッセージがある場合はログに記録
         if error_messages:
@@ -163,8 +171,8 @@ async def search_storage(
         crud = StorageDataCRUD(db)
         all_results = crud.search_by_params(search_params)
         
-        # 安全にスキーマに変換
-        successful_data, error_messages = convert_storage_data_safely(all_results)
+        # 安全にスキーマに変換（search_storageではStorageDataSearchResponseを使用）
+        successful_data, error_messages = convert_storage_data_safely(all_results, use_search_response=True)
         
         # エラーメッセージがある場合はログに記録
         if error_messages:

@@ -4,8 +4,8 @@ from typing import List, Optional, Union
 from pydantic import BaseModel, ConfigDict, Field, field_validator, ValidationError
 
 
-class StorageDataBase(BaseModel):
-    """ストレージデータの基本スキーマ"""
+class StorageDataSearchResponse(BaseModel):
+    """ストレージ検索用レスポンススキーマ（image_url_listを除外）"""
 
     storage_data_id: str = Field(..., description="ストレージデータID")
     storage_category: int = Field(..., description="ストレージカテゴリ（0: Box, 1: Shelf）")
@@ -14,7 +14,6 @@ class StorageDataBase(BaseModel):
     item_title: str = Field(..., description="アイテムタイトル")
     item_url: str = Field(..., description="アイテムURL")
     primary_image_url: str = Field(..., description="メイン画像URL")
-    image_url_list: List[str] = Field(..., description="画像URLリスト")
     price: float = Field(..., description="価格")
     ean: Optional[str] = Field(None, description="EANコード")
     height: float = Field(..., description="高さ")
@@ -24,17 +23,17 @@ class StorageDataBase(BaseModel):
     materials: List[int] = Field(..., description="素材のリスト")
     updated_at: datetime = Field(..., description="更新日時")
     seller_name: Optional[str] = Field(None, description="販売者名")
-    box_likelihood: Optional[float] = Field(None, description="ボックス確率")
     box_features: Optional[List[int]] = Field(None, description="ボックス特徴")
-    shelf_likelihood: Optional[float] = Field(None, description="棚確率")
     shelf_features: Optional[List[int]] = Field(None, description="棚特徴")
     shelf_genres: Optional[List[int]] = Field(None, description="棚ジャンル")
-    country_code: str = Field(description="国コード（jp/us）")
-    active: bool = Field(description="アクティブフラグ")
+
+    model_config = ConfigDict(from_attributes=True)
 
 
-class StorageDataResponse(StorageDataBase):
-    """ストレージデータレスポンススキーマ"""
+class StorageDataResponse(StorageDataSearchResponse):
+    """ストレージデータレスポンススキーマ（image_url_listを含む）"""
+
+    image_url_list: List[str] = Field(..., description="画像URLリスト")
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -105,7 +104,7 @@ class SearchStorageResponse(BaseModel):
     page_size: int = Field(..., description="ページサイズ")
     has_more: bool = Field(..., description="次のページがあるか")
     next_page_url: Optional[str] = Field(None, description="次のページのURL")
-    data: List[StorageDataResponse] = Field(..., description="ストレージデータリスト")
+    data: List[StorageDataSearchResponse] = Field(..., description="ストレージデータリスト")
 
 
 class FetchStorageRequest(BaseModel):
