@@ -120,11 +120,52 @@ class StorageDataCRUD:
         if size_conditions:
             if params.enable_inverted_search:
                 # 反転検索の場合：幅と奥行きを入れ替えて検索
+                # オリジナルのロジックを素直に移植
                 inverted_conditions = []
+                
+                # 幅と奥行きの条件を入れ替えて新しい条件を生成
+                for dim in ['width', 'depth']:
+                    inverted_dim = 'depth' if dim == 'width' else 'width'
+                    
+                    # 範囲指定の場合
+                    use_range_key = f'use_{dim}_range'
+                    if getattr(params, use_range_key, False):
+                        lower_limit_key = f'{dim}_lower_limit'
+                        upper_limit_key = f'{dim}_upper_limit'
+                        lower_limit = getattr(params, lower_limit_key)
+                        upper_limit = getattr(params, upper_limit_key)
+                        
+                        if lower_limit is not None and upper_limit is not None:
+                            if inverted_dim == 'width':
+                                inverted_conditions.append(
+                                    between(StorageData.width, lower_limit, upper_limit)
+                                )
+                            else:
+                                inverted_conditions.append(
+                                    between(StorageData.depth, lower_limit, upper_limit)
+                                )
+                    
+                    # 単一値指定の場合
+                    elif getattr(params, dim, None) is not None:
+                        tolerance = 0.5  # デフォルトの許容範囲
+                        value = getattr(params, dim)
+                        
+                        if inverted_dim == 'width':
+                            inverted_conditions.append(
+                                between(StorageData.width, value - tolerance, value + tolerance)
+                            )
+                        else:
+                            inverted_conditions.append(
+                                between(StorageData.depth, value - tolerance, value + tolerance)
+                            )
+                
+                # 高さの条件はそのまま追加（反転検索の対象外）
+                height_conditions = []
                 for condition in size_conditions:
-                    # 幅と奥行きの条件を入れ替える処理を実装
-                    # ここでは簡略化のため、元の条件を使用
-                    inverted_conditions.append(condition)
+                    if 'StorageData.height' in str(condition):
+                        height_conditions.append(condition)
+                
+                inverted_conditions.extend(height_conditions)
 
                 # 元の条件と反転条件をORで結合
                 query = query.filter(or_(*size_conditions, *inverted_conditions))

@@ -202,3 +202,140 @@ def add_test_data_with_active_status(test_engine):
         logger.info("Test data added: 5 active=True items, 5 active=False items")
     finally:
         db.close()
+
+
+@pytest.fixture(scope="function")
+def setup_inverted_search_database(test_engine):
+    """反転検索テスト用データベースをセットアップ"""
+    # 既存のテーブルを削除してから再作成
+    Base.metadata.drop_all(bind=test_engine)
+    Base.metadata.create_all(bind=test_engine)
+
+    # 反転検索専用のテストデータを準備
+    add_inverted_search_test_data(test_engine)
+        
+    yield
+    
+    # テスト終了後にテーブルを削除
+    Base.metadata.drop_all(bind=test_engine)
+
+
+def add_inverted_search_test_data(test_engine):
+    """反転検索テスト用のテストデータを追加"""
+    # テスト用セッションファクトリを作成
+    TestingSessionLocal = sessionmaker(
+        autocommit=False,
+        autoflush=False,
+        bind=test_engine
+    )
+    
+    db = TestingSessionLocal()
+    try:
+        # 1. 幅20cm、奥行き30cm、高さ25cm
+        db.add(StorageData(
+            storage_data_id="width_20_depth_30_height_25",
+            storage_category=0,
+            shop_id=1,
+            item_id="item_1",
+            item_title="width_20_depth_30_height_25_title",
+            item_url="https://example.com/item_1",
+            primary_image_url="https://example.com/item_1.jpg",
+            image_url_list=["https://example.com/item_1.jpg"],
+            materials=[],
+            colors=[],
+            price=1000,
+            ean="ean_1",
+            height=25,
+            width=20,
+            depth=30,
+            country_code="jp",
+            active=True,
+        ))
+        
+        # 2. 幅30cm、奥行き20cm、高さ25cm
+        db.add(StorageData(
+            storage_data_id="width_30_depth_20_height_25",
+            storage_category=0,
+            shop_id=2,
+            item_id="item_2",
+            item_title="width_30_depth_20_height_25_title",
+            item_url="https://example.com/item_2",
+            primary_image_url="https://example.com/item_2.jpg",
+            image_url_list=["https://example.com/item_2.jpg"],
+            materials=[],
+            colors=[],
+            price=2000,
+            ean="ean_2",
+            height=25,
+            width=30,
+            depth=20,
+            country_code="jp",
+            active=True,
+        ))
+        
+        # 3. 幅25cm、奥行き35cm、高さ25cm（範囲検索用）
+        db.add(StorageData(
+            storage_data_id="width_25_depth_35_height_25",
+            storage_category=0,
+            shop_id=3,
+            item_id="item_3",
+            item_title="width_25_depth_35_height_25_title",
+            item_url="https://example.com/item_3",
+            primary_image_url="https://example.com/item_3.jpg",
+            image_url_list=["https://example.com/item_3.jpg"],
+            materials=[],
+            colors=[],
+            price=3000,
+            ean="ean_3",
+            height=25,
+            width=25,
+            depth=35,
+            country_code="jp",
+            active=True,
+        ))
+        
+        # 4. 幅35cm、奥行き25cm、高さ25cm（範囲検索用）
+        db.add(StorageData(
+            storage_data_id="width_35_depth_25_height_25",
+            storage_category=0,
+            shop_id=4,
+            item_id="item_4",
+            item_title="width_35_depth_25_height_25_title",
+            item_url="https://example.com/item_4",
+            primary_image_url="https://example.com/item_4.jpg",
+            image_url_list=["https://example.com/item_4.jpg"],
+            materials=[],
+            colors=[],
+            price=4000,
+            ean="ean_4",
+            height=25,
+            width=35,
+            depth=25,
+            country_code="jp",
+            active=True,
+        ))
+        
+        # 5. 幅20cm、奥行き30cm、高さ30cm（高さテスト用）
+        db.add(StorageData(
+            storage_data_id="width_20_depth_30_height_30",
+            storage_category=0,
+            shop_id=5,
+            item_id="item_5",
+            item_title="width_20_depth_30_height_30_title",
+            item_url="https://example.com/item_5",
+            primary_image_url="https://example.com/item_5.jpg",
+            image_url_list=["https://example.com/item_5.jpg"],
+            materials=[],
+            colors=[],
+            price=5000,
+            ean="ean_5",
+            height=30,
+            width=20,
+            depth=30,
+            country_code="jp",
+            active=True,
+        ))
+        
+        db.commit()
+    finally:
+        db.close()

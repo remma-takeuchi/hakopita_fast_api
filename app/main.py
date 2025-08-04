@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -15,13 +16,24 @@ logger = setup_logging()
 # バージョン取得（環境変数から）
 VERSION = os.getenv("VERSION", "unknown")
 
-# データベーステーブルを作成（エラーハンドリング付き）
-try:
-    Base.metadata.create_all(bind=engine)
-    logger.info("データベーステーブルを作成しました。")
-except Exception as e:
-    logger.error(f"データベーステーブル作成中にエラーが発生しました: {e}")
-    logger.warning("アプリケーションは起動しますが、データベース機能は利用できません。")
+
+def is_testing() -> bool:
+    """テスト環境かどうかを判定"""
+    return (
+        'pytest' in sys.modules or
+        os.getenv('PYTEST_CURRENT_TEST') is not None or
+        'test' in sys.argv[0] if sys.argv else False
+    )
+
+
+# データベーステーブルを作成（テスト環境以外で実行）
+if not is_testing():
+    try:
+        Base.metadata.create_all(bind=engine)
+        logger.info("データベーステーブルを作成しました。")
+    except Exception as e:
+        logger.error(f"データベーステーブル作成中にエラーが発生しました: {e}")
+        logger.warning("アプリケーションは起動しますが、データベース機能は利用できません。")
 
 # FastAPIアプリケーションを作成
 app = FastAPI(

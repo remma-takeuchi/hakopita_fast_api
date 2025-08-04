@@ -284,3 +284,145 @@ def test_search_storage_active_behavior(setup_database_with_active_data, test_cl
     
     logger.info(f"Active behavior response: {data}")
     logger.info("=== Search_storage active field behavior test completed ===")
+
+
+# 反転検索専用テストパターン
+
+def test_inverted_search_width_20cm(setup_inverted_search_database, test_client):
+    """幅20cm検索での反転検索テスト - 通常2件、反転3件"""
+    logger.info("幅20cm検索での反転検索テストを開始")
+
+    # 通常検索（デフォルトでstorage_category=0）
+    response_normal = test_client.get("/search_storage?width=20&storage_category=0&country_code=jp")
+    assert response_normal.status_code == 200
+    data_normal = response_normal.json()
+    logger.info(f"幅20cm通常検索結果: {data_normal['total_items']}件")
+    
+    # 通常検索で返されたアイテムのIDを確認
+    normal_ids = [item['storage_data_id'] for item in data_normal['data']]
+    logger.info(f"通常検索でマッチしたID: {normal_ids}")
+
+    # 反転検索（デフォルトでstorage_category=0）
+    response_inverted = test_client.get("/search_storage?width=20&enable_inverted_search=true&storage_category=0&country_code=jp")
+    assert response_inverted.status_code == 200
+    data_inverted = response_inverted.json()
+    logger.info(f"幅20cm反転検索結果: {data_inverted['total_items']}件")
+    
+    # 反転検索で返されたアイテムのIDを確認  
+    inverted_ids = [item['storage_data_id'] for item in data_inverted['data']]
+    logger.info(f"反転検索でマッチしたID: {inverted_ids}")
+
+    # 期待される結果：
+    # 通常検索: width=20でマッチ → width_20_depth_30_height_25, width_20_depth_30_height_30 (2件)
+    # 反転検索: width=20 OR depth=20でマッチ → 上記2件 + width_30_depth_20_height_25 (3件)
+    assert data_normal["total_items"] == 2
+    assert data_inverted["total_items"] == 3
+
+    # 反転検索で結果が増えることを確認
+    assert data_inverted["total_items"] > data_normal["total_items"]
+
+
+def test_inverted_search_depth_20cm(setup_inverted_search_database, test_client):
+    """奥行き20cm検索での反転検索テスト - 通常1件、反転3件"""
+    logger.info("奥行き20cm検索での反転検索テストを開始")
+
+    # 通常検索（デフォルトでstorage_category=0）
+    response_normal = test_client.get("/search_storage?depth=20&storage_category=0&country_code=jp")
+    assert response_normal.status_code == 200
+    data_normal = response_normal.json()
+    logger.info(f"奥行き20cm通常検索結果: {data_normal['total_items']}件")
+    
+    normal_ids = [item['storage_data_id'] for item in data_normal['data']]
+    print(f"通常検索でマッチしたID: {normal_ids}")
+
+    # 反転検索（デフォルトでstorage_category=0）
+    response_inverted = test_client.get("/search_storage?depth=20&enable_inverted_search=true&storage_category=0&country_code=jp")
+    assert response_inverted.status_code == 200
+    data_inverted = response_inverted.json()
+    logger.info(f"奥行き20cm反転検索結果: {data_inverted['total_items']}件")
+    
+    inverted_ids = [item['storage_data_id'] for item in data_inverted['data']]
+    print(f"反転検索でマッチしたID: {inverted_ids}")
+
+    print(f"通常検索件数: {data_normal['total_items']}, 反転検索件数: {data_inverted['total_items']}")
+    
+    # 期待される結果：
+    # 通常検索: depth=20でマッチ → width_30_depth_20_height_25 (1件)
+    # 反転検索: depth=20 OR width=20でマッチ → width_30_depth_20_height_25 + width_20_depth_30_height_25 + width_20_depth_30_height_30 (3件)
+    assert data_normal["total_items"] == 1
+    assert data_inverted["total_items"] == 3
+
+    # 反転検索で結果が増えることを確認
+    assert data_inverted["total_items"] > data_normal["total_items"]
+
+
+def test_inverted_search_height_30cm(setup_inverted_search_database, test_client):
+    """高さ30cm検索での反転検索テスト - 通常1件、反転5件"""
+    logger.info("高さ30cm検索での反転検索テストを開始")
+
+    # 通常検索（デフォルトでstorage_category=0）
+    response_normal = test_client.get("/search_storage?height=30&storage_category=0&country_code=jp")
+    assert response_normal.status_code == 200
+    data_normal = response_normal.json()
+    logger.info(f"高さ30cm通常検索結果: {data_normal['total_items']}件")
+    
+    normal_ids = [item['storage_data_id'] for item in data_normal['data']]
+    print(f"通常検索でマッチしたID: {normal_ids}")
+
+    # 反転検索（デフォルトでstorage_category=0）
+    response_inverted = test_client.get("/search_storage?height=30&enable_inverted_search=true&storage_category=0&country_code=jp")
+    assert response_inverted.status_code == 200
+    data_inverted = response_inverted.json()
+    logger.info(f"高さ30cm反転検索結果: {data_inverted['total_items']}件")
+    
+    inverted_ids = [item['storage_data_id'] for item in data_inverted['data']]
+    print(f"反転検索でマッチしたID: {inverted_ids}")
+
+    print(f"通常検索件数: {data_normal['total_items']}, 反転検索件数: {data_inverted['total_items']}")
+    
+    # 期待される結果：
+    # 通常検索: height=30でマッチ → width_20_depth_30_height_30 (1件)
+    # 反転検索: 高さは反転対象外なので同じ結果 → width_20_depth_30_height_30 (1件)
+    assert data_normal["total_items"] == 1
+    assert data_inverted["total_items"] == 1
+
+    # 高さは反転対象外なので結果が変わらないことを確認
+    assert data_inverted["total_items"] == data_normal["total_items"]
+
+
+def test_inverted_search_width_range_20_30cm(setup_inverted_search_database, test_client):
+    """幅20-30cm範囲検索での反転検索テスト - 通常4件、反転5件"""
+    logger.info("幅20-30cm範囲検索での反転検索テストを開始")
+
+    # 通常検索（デフォルトでstorage_category=0）
+    response_normal = test_client.get(
+        "/search_storage?width_lower_limit=20&width_upper_limit=30&use_width_range=true&storage_category=0&country_code=jp"
+    )
+    assert response_normal.status_code == 200
+    data_normal = response_normal.json()
+    logger.info(f"幅20-30cm範囲通常検索結果: {data_normal['total_items']}件")
+    
+    normal_ids = [item['storage_data_id'] for item in data_normal['data']]
+    print(f"通常検索でマッチしたID: {normal_ids}")
+
+    # 反転検索（デフォルトでstorage_category=0）
+    response_inverted = test_client.get(
+        "/search_storage?width_lower_limit=20&width_upper_limit=30&use_width_range=true&enable_inverted_search=true&storage_category=0&country_code=jp"
+    )
+    assert response_inverted.status_code == 200
+    data_inverted = response_inverted.json()
+    logger.info(f"幅20-30cm範囲反転検索結果: {data_inverted['total_items']}件")
+    
+    inverted_ids = [item['storage_data_id'] for item in data_inverted['data']]
+    print(f"反転検索でマッチしたID: {inverted_ids}")
+
+    print(f"通常検索件数: {data_normal['total_items']}, 反転検索件数: {data_inverted['total_items']}")
+    
+    # 期待される結果：
+    # 通常検索: width=20-30でマッチ → width_20_depth_30_height_25, width_30_depth_20_height_25, width_25_depth_35_height_25, width_20_depth_30_height_30 (4件)
+    # 反転検索: width=20-30 OR depth=20-30でマッチ → 上記4件 + width_35_depth_25_height_25 (5件)
+    assert data_normal["total_items"] == 4
+    assert data_inverted["total_items"] == 5
+
+    # 反転検索で結果が増えることを確認
+    assert data_inverted["total_items"] > data_normal["total_items"]

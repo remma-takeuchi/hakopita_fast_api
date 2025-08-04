@@ -1,8 +1,9 @@
 import os
+import sys
 from typing import Optional
 
 import pymysql
-from pydantic import ConfigDict
+from pydantic import ConfigDict, computed_field
 from pydantic_settings import BaseSettings
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import declarative_base, sessionmaker
@@ -25,17 +26,34 @@ class Settings(BaseSettings):
     
     # 環境変数ファイル(.env.*)から読み込む（デフォルトは.env.dev）
     model_config = ConfigDict(
-        env_file=f".env.{os.getenv('ENV', 'dev')}", env_file_encoding="utf-8"
+        env_file=f".env.{os.getenv('ENV', 'dev')}", 
+        env_file_encoding="utf-8",
+        extra="ignore"  # 追加の環境変数を無視
     )
 
-    # データベースURLを作成
-    database_url: str = f"mysql+pymysql://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}"
+    @computed_field
+    @property
+    def database_url(self) -> str:
+        """データベースURLを動的に生成"""
+        return f"mysql+pymysql://{self.db_user}:{self.db_pass}@{self.db_host}:{self.db_port}/{self.db_name}"
+
+
+# テスト環境かどうかを判定
+def is_testing() -> bool:
+    """テスト環境かどうかを判定"""
+    return (
+        'pytest' in sys.modules or
+        os.getenv('PYTEST_CURRENT_TEST') is not None or
+        'test' in sys.argv[0] if sys.argv else False
+    )
 
 
 # 設定インスタンスを作成
 settings = Settings()
-print(settings.database_url)
-print(os.environ)
+
+# テスト環境でない場合のみDB情報を出力
+if not is_testing():
+    print(settings.database_url)
 
 # SQLAlchemy設定
 engine = create_engine(
