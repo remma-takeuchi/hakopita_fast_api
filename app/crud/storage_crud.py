@@ -168,7 +168,9 @@ class StorageDataCRUD:
                 inverted_conditions.extend(height_conditions)
 
                 # 元の条件と反転条件をORで結合
-                query = query.filter(or_(*size_conditions, *inverted_conditions))
+                original_condition = and_(*size_conditions)
+                inverted_condition = and_(*inverted_conditions)
+                query = query.filter(or_(original_condition, inverted_condition))
             else:
                 # 通常の検索：AND条件で結合
                 query = query.filter(and_(*size_conditions))
